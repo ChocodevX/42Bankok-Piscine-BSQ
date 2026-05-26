@@ -1,7 +1,4 @@
 #include "bsq.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 void	ft_process_map(int fd, t_map *map)
 {
@@ -10,12 +7,12 @@ void	ft_process_map(int fd, t_map *map)
 	content = ft_read_file(fd);
 	if (!content)
 	{
-		write(2, "map error\n", 10);
+		write(2, "map error1\n", 11);
 		return ;
 	}
 	if (!ft_parse_header(content, map))
 	{
-		write(2, "map error\n", 10);
+		write(2, "map error2\n", 11);
 		free(content);
 		return ;
 	}
@@ -23,14 +20,14 @@ void	ft_process_map(int fd, t_map *map)
 	free(content);
 	if (!ft_validate_map(map))
 	{
-		write(2, "map error\n", 10);
+		write(2, "map error3\n", 11);
 		ft_free_map(map);
 		return ;
 	}
 	map->dp = ft_build_dp(map);
 	if (!map->dp)
 	{
-		write(2, "map error\n", 10);
+		write(2, "map error4\n", 11);
 		ft_free_map(map);
 		return ;
 	}
@@ -58,7 +55,7 @@ int	main(int argc, char **argv)
 			fd = open(argv[i], O_RDONLY);
 			if (fd == -1)
 			{
-				write(2, "map error\n", 10);
+				write(2, "map error5\n", 11);
 			}
 			else
 			{

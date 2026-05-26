@@ -1,7 +1,4 @@
 #include "bsq.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 char	**ft_build_map(char *content, t_map *map)
 {

@@ -1,7 +1,4 @@
 #include "bsq.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 int	ft_atoi(char *str, int len)
 {

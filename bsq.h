@@ -1,6 +1,10 @@
 #ifndef BSQ_H
 # define BSQ_H
 
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 typedef struct s_map
 {
 	int		rows;

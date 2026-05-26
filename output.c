@@ -1,7 +1,4 @@
 #include "bsq.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 void	ft_print_map(t_map *map)
 {
