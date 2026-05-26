@@ -1,91 +1,68 @@
+#include "bsq.h"
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-// ##################
-#include <stdio.h>
-
-// ##################
-
-char	*ft_join(char *result, char *buffer, int bytes_read)
+void	ft_process_map(int fd, t_map *map)
 {
-	char	*new;
-	int		old_len;
-	int		i;
-	int		j;
+	char	*content;
 
-	old_len = 0;
-	if (result)
-		while (result[old_len])
-			old_len++;
-	new = malloc(old_len + bytes_read + 1);
-	if (!new)
-		return (NULL);
-	i = 0;
-	while (i < old_len)
+	content = ft_read_file(fd);
+	if (!content)
 	{
-		new[i] = result[i];
-		i++;
+		write(1, "map error\n", 10);
+		return ;
 	}
-	j = 0;
-	while (j < bytes_read)
+	if (!ft_parse_header(content, map))
 	{
-		new[i] = buffer[j];
-		i++;
-		j++;
+		write(1, "map error\n", 10);
+		free(content);
+		return ;
 	}
-	new[i] = '\0';
-	if (result)
-		free(result);
-	return (new);
-}
-
-char	*ft_read_file(int fd)
-{
-	char	buffer[4096];
-	char	*result;
-	int		bytes_read;
-
-	result = NULL;
-	while ((bytes_read = read(fd, buffer, 4096)) > 0)
+	map->map = ft_build_map(content, map);
+	free(content);
+	if (!ft_validate_map(map))
 	{
-		result = ft_join(result, buffer, bytes_read);
-		if (!result)
-			return (NULL);
+		write(1, "map error\n", 10);
+		ft_free_map(map);
+		return ;
 	}
-	if (bytes_read == -1)
-	{
-		if (result)
-			free(result);
-		return (NULL);
-	}
-	return (result);
-}
-
-int	ft_open_file(char *filename)
-{
-	int	fd;
-
-	fd = open(filename, O_RDONLY);
-	if (fd == -1)
-	{
-		write(2, "map error\n", 10);
-		return (-1);
-	}
-	return (fd);
+	map->dp = ft_build_dp(map);
+	ft_find_square(map, map->dp);
+	ft_draw_square(map);
+	ft_print_map(map);
+	ft_free_map(map);
 }
 
 int	main(int argc, char **argv)
 {
+	int i;
+	int fd;
+	t_map map;
+
 	if (argc == 1)
-		ft_read_file(0);
+	{
+		ft_process_map(0, &map);
+	}
 	else
 	{
-		int i = 1;
+		i = 1;
 		while (i < argc)
 		{
-			ft_open_file(argv[i]);
+			fd = open(argv[i], O_RDONLY);
+			if (fd == -1)
+			{
+				write(1, "map error\n", 10);
+			}
+			else
+			{
+				ft_process_map(fd, &map);
+				close(fd);
+			}
+			if (i < argc - 1)
+				write(1, "\n", 1);
 			i++;
 		}
 	}
+	return (0);
 }
