@@ -44,7 +44,6 @@ void	ft_free_map(t_map *map)
 {
 	int i;
 
-	// free map rows
 	if (map->map)
 	{
 		i = 0;
@@ -58,7 +57,6 @@ void	ft_free_map(t_map *map)
 		map->map = NULL;
 	}
 
-	// free dp rows
 	if (map->dp)
 	{
 		i = 0;

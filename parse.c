@@ -25,25 +25,47 @@ char	**ft_build_map(char *content, t_map *map)
 	{
 		if (content[i] == '\0')
 		{
-			grid[row] = NULL;
+			while (row <= map->rows)
+				grid[row++] = NULL;
 			return (grid);
 		}
 		grid[row] = malloc(sizeof(char) * (map->cols + 1));
 		if (!grid[row])
+		{
+			while (row > 0)
+				free(grid[--row]);
+			free(grid);
 			return (NULL);
+		}
 		col = 0;
-		while (col < map->cols)
+		while (col < map->cols && content[i] != '\0' && content[i] != '\n')
 		{
 			grid[row][col] = content[i];
 			i++;
 			col++;
 		}
 		grid[row][col] = '\0';
+		if (col < map->cols || (content[i] != '\n' && content[i] != '\0'))
+		{
+			free(grid[row]);
+			while (row > 0)
+				free(grid[--row]);
+			free(grid);
+			return (NULL);
+		}
 		if (content[i] == '\n')
 			i++;
 		row++;
 	}
 	grid[row] = NULL;
+	if (content[i] != '\0')
+	{
+		row = 0;
+		while (row < map->rows)
+			free(grid[row++]);
+		free(grid);
+		return (NULL);
+	}
 	return (grid);
 }
 
@@ -54,11 +76,20 @@ int	ft_parse_header(char *content, t_map *map)
 	i = 0;
 	while (content[i] && content[i] != '\n')
 		i++;
-	if (content[i] != '\n')
+	if (content[i] != '\n' || i < 3)
 		return (0);
 	map->full_char = content[i - 1];
 	map->obstacle_char = content[i - 2];
 	map->empty_char = content[i - 3];
+	if ((unsigned char)map->empty_char < 32
+		|| (unsigned char)map->empty_char > 126)
+		return (0);
+	if ((unsigned char)map->obstacle_char < 32
+		|| (unsigned char)map->obstacle_char > 126)
+		return (0);
+	if ((unsigned char)map->full_char < 32
+		|| (unsigned char)map->full_char > 126)
+		return (0);
 	map->rows = ft_atoi(content, i - 3);
 	if (map->rows <= 0)
 		return (0);
@@ -84,7 +115,11 @@ char	*ft_join(char *result, char *buffer, int bytes_read)
 			old_len++;
 	new = malloc(old_len + bytes_read + 1);
 	if (!new)
+	{
+		if (result)
+			free(result);
 		return (NULL);
+	}
 	i = 0;
 	while (i < old_len)
 	{
@@ -124,17 +159,4 @@ char	*ft_read_file(int fd)
 		return (NULL);
 	}
 	return (result);
-}
-
-int	ft_open_file(char *filename)
-{
-	int fd;
-
-	fd = open(filename, O_RDONLY);
-	if (fd == -1)
-	{
-		write(2, "map error\n", 10);
-		return (-1);
-	}
-	return (fd);
 }

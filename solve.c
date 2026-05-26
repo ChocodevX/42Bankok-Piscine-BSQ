@@ -58,7 +58,12 @@ int	**ft_build_dp(t_map *map)
 	{
 		dp[i] = malloc(sizeof(int) * map->cols);
 		if (!dp[i])
+		{
+			while (i > 0)
+				free(dp[--i]);
+			free(dp);
 			return (NULL);
+		}
 		i++;
 	}
 	i = 0;
