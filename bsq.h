@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   bsq.h                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ponsumri <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/27 15:20:45 by ponsumri          #+#    #+#             */
+/*   Updated: 2026/05/27 15:20:46 by ponsumri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef BSQ_H
 # define BSQ_H
 
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
+# include <fcntl.h>
+# include <stdlib.h>
+# include <unistd.h>
 
 typedef struct s_map
 {
@@ -20,13 +32,12 @@ typedef struct s_map
 }			t_map;
 
 void		ft_process_map(int fd, t_map *map);
+void		ft_process_files(int argc, char **argv, t_map *map);
 void		ft_print_map(t_map *map);
 void		ft_draw_square(t_map *map);
 char		**ft_build_map(char *content, t_map *map);
 int			ft_parse_header(char *content, t_map *map);
-char		*ft_join(char *result, char *buffer, int bytes_read);
 char		*ft_read_file(int fd);
-void		ft_find_square(t_map *map, int **dp);
 int			ft_min(int a, int b, int c);
 int			**ft_build_dp(t_map *map);
 int			ft_atoi(char *str, int len);

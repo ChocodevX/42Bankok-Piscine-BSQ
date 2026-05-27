@@ -1,17 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   output.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ponsumri <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/27 15:20:59 by ponsumri          #+#    #+#             */
+/*   Updated: 2026/05/27 15:21:00 by ponsumri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "bsq.h"
 
 void	ft_print_map(t_map *map)
 {
 	int	i;
-	int	j;
 
 	i = 0;
 	while (i < map->rows)
 	{
-		j = 0;
-		while (map->map[i][j])
-			j++;
-		write(1, map->map[i], j);
+		write(1, map->map[i], map->cols);
 		write(1, "\n", 1);
 		i++;
 	}
@@ -19,8 +27,8 @@ void	ft_print_map(t_map *map)
 
 void	ft_draw_square(t_map *map)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = map->best_row;
 	while (i < map->best_row + map->best_size)

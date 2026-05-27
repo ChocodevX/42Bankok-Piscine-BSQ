@@ -1,69 +1,101 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ponsumri <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/27 15:21:17 by ponsumri          #+#    #+#             */
+/*   Updated: 2026/05/27 15:21:22 by ponsumri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "bsq.h"
 
-char	**ft_build_map(char *content, t_map *map)
+static char	*ft_resize(char *res, int *cs, int n)
 {
-	char	**grid;
+	char	*new;
 	int		i;
-	int		row;
-	int		col;
 
+	while (cs[1] + n >= cs[0])
+		cs[0] *= 2;
+	new = malloc(cs[0] + 1);
+	if (!new)
+	{
+		free(res);
+		return (NULL);
+	}
 	i = 0;
-	while (content[i] && content[i] != '\n')
+	while (i < cs[1])
+	{
+		new[i] = res[i];
 		i++;
-	i++;
-	map->cols = 0;
-	while (content[i + map->cols] && content[i + map->cols] != '\n')
-		map->cols++;
-	grid = malloc(sizeof(char *) * (map->rows + 1));
-	if (!grid)
-		return (NULL);
-	row = 0;
-	while (row < map->rows)
-	{
-		if (content[i] == '\0')
-		{
-			while (row <= map->rows)
-				grid[row++] = NULL;
-			return (grid);
-		}
-		grid[row] = malloc(sizeof(char) * (map->cols + 1));
-		if (!grid[row])
-		{
-			while (row > 0)
-				free(grid[--row]);
-			free(grid);
-			return (NULL);
-		}
-		col = 0;
-		while (col < map->cols && content[i] != '\0' && content[i] != '\n')
-		{
-			grid[row][col] = content[i];
-			i++;
-			col++;
-		}
-		grid[row][col] = '\0';
-		if (col < map->cols || (content[i] != '\n' && content[i] != '\0'))
-		{
-			free(grid[row]);
-			while (row > 0)
-				free(grid[--row]);
-			free(grid);
-			return (NULL);
-		}
-		if (content[i] == '\n')
-			i++;
-		row++;
 	}
-	grid[row] = NULL;
-	if (content[i] != '\0')
+	free(res);
+	return (new);
+}
+
+static char	*ft_grow(char *res, char *buf, int *cs, int n)
+{
+	int	i;
+
+	if (cs[1] + n >= cs[0])
 	{
-		row = 0;
-		while (row < map->rows)
-			free(grid[row++]);
-		free(grid);
-		return (NULL);
+		res = ft_resize(res, cs, n);
+		if (!res)
+			return (NULL);
 	}
-	return (grid);
+	i = 0;
+	while (i < n)
+		res[cs[1]++] = buf[i++];
+	return (res);
+}
+
+char	*ft_read_file(int fd)
+{
+	char	buf[4096];
+	char	*result;
+	int		cs[2];
+	int		n;
+
+	cs[0] = 4096;
+	cs[1] = 0;
+	result = malloc(cs[0] + 1);
+	if (!result)
+		return (NULL);
+	n = read(fd, buf, 4096);
+	while (n > 0)
+	{
+		result = ft_grow(result, buf, cs, n);
+		if (!result)
+			return (NULL);
+		n = read(fd, buf, 4096);
+	}
+	result[cs[1]] = '\0';
+	if (n != -1)
+		return (result);
+	free(result);
+	return (NULL);
+}
+
+static int	ft_valid_chars(t_map *map)
+{
+	if ((unsigned char)map->empty_char < 32
+		|| (unsigned char)map->empty_char > 126)
+		return (0);
+	if ((unsigned char)map->obstacle_char < 32
+		|| (unsigned char)map->obstacle_char > 126)
+		return (0);
+	if ((unsigned char)map->full_char < 32
+		|| (unsigned char)map->full_char > 126)
+		return (0);
+	if (map->empty_char == map->obstacle_char)
+		return (0);
+	if (map->empty_char == map->full_char)
+		return (0);
+	if (map->obstacle_char == map->full_char)
+		return (0);
+	return (1);
 }
 
 int	ft_parse_header(char *content, t_map *map)
@@ -78,82 +110,10 @@ int	ft_parse_header(char *content, t_map *map)
 	map->full_char = content[i - 1];
 	map->obstacle_char = content[i - 2];
 	map->empty_char = content[i - 3];
-	if ((unsigned char)map->empty_char < 32
-		|| (unsigned char)map->empty_char > 126)
-		return (0);
-	if ((unsigned char)map->obstacle_char < 32
-		|| (unsigned char)map->obstacle_char > 126)
-		return (0);
-	if ((unsigned char)map->full_char < 32
-		|| (unsigned char)map->full_char > 126)
+	if (!ft_valid_chars(map))
 		return (0);
 	map->rows = ft_atoi(content, i - 3);
 	if (map->rows <= 0)
 		return (0);
-	if (map->empty_char == map->obstacle_char)
-		return (0);
-	if (map->empty_char == map->full_char)
-		return (0);
-	if (map->obstacle_char == map->full_char)
-		return (0);
 	return (1);
-}
-
-char	*ft_join(char *result, char *buffer, int bytes_read)
-{
-	char	*new;
-	int		old_len;
-	int		i;
-	int		j;
-
-	old_len = 0;
-	if (result)
-		while (result[old_len])
-			old_len++;
-	new = malloc(old_len + bytes_read + 1);
-	if (!new)
-	{
-		if (result)
-			free(result);
-		return (NULL);
-	}
-	i = 0;
-	while (i < old_len)
-	{
-		new[i] = result[i];
-		i++;
-	}
-	j = 0;
-	while (j < bytes_read)
-	{
-		new[i] = buffer[j];
-		i++;
-		j++;
-	}
-	new[i] = '\0';
-	if (result)
-		free(result);
-	return (new);
-}
-
-char	*ft_read_file(int fd)
-{
-	char	buffer[4096];
-	char	*result;
-	int		bytes_read;
-
-	result = NULL;
-	while ((bytes_read = read(fd, buffer, 4096)) > 0)
-	{
-		result = ft_join(result, buffer, bytes_read);
-		if (!result)
-			return (NULL);
-	}
-	if (bytes_read == -1)
-	{
-		if (result)
-			free(result);
-		return (NULL);
-	}
-	return (result);
 }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ponsumri <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/27 15:21:40 by ponsumri          #+#    #+#             */
+/*   Updated: 2026/05/27 15:21:41 by ponsumri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "bsq.h"
 
 int	ft_atoi(char *str, int len)
@@ -39,34 +51,20 @@ void	ft_putstr_fd(char *str, int fd)
 
 void	ft_free_map(t_map *map)
 {
-	int i;
+	int	i;
 
+	i = 0;
+	while (map->map && i < map->rows)
+		free(map->map[i++]);
 	if (map->map)
-	{
-		i = 0;
-		while (i < map->rows)
-		{
-			if (map->map[i])
-				free(map->map[i]);
-			i++;
-		}
 		free(map->map);
-		map->map = NULL;
-	}
-
+	map->map = NULL;
+	i = 0;
+	while (map->dp && i < map->rows)
+		free(map->dp[i++]);
 	if (map->dp)
-	{
-		i = 0;
-		while (i < map->rows)
-		{
-			if (map->dp[i])
-				free(map->dp[i]);
-			i++;
-		}
 		free(map->dp);
-		map->dp = NULL;
-	}
-
+	map->dp = NULL;
 	map->rows = 0;
 	map->cols = 0;
 	map->best_size = 0;
